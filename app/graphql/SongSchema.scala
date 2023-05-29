@@ -8,7 +8,7 @@ import sangria.schema._
 import sangria.util.tag.@@
 import service.SongService
 
-object SongSchema {
+case class SongSchema() {
 
   implicit lazy val songHasId = HasId[SongDTO, Long](_.id)
 
@@ -18,9 +18,9 @@ object SongSchema {
   val songQueryType = ObjectType[SongService, Unit](
     name = "songQuery",
     fields = fields[SongService, Unit](
-      Field("getAllSongs", ListType(MainContext), resolve = context => context.ctx.getAll()),
-      Field("getAllSongsById", ListType(SongDTO.songGraphQL), arguments = ids :: Nil, resolve = context => songFetcher.deferSeq(context arg ids)),
-      Field("getSongById", OptionType(SongDTO.songGraphQL), arguments = id :: Nil, resolve = context => songFetcher.deferOpt(context arg id))
+      Field("getAllSongs", ListType(SongDTO.songGraphQL), resolve = context => context.ctx.getAll),
+      Field("getAllSongsById", ListType(SongDTO.songGraphQL), arguments = ids :: Nil, resolve = context => context.ctx.getAllById(context arg ids)),
+      Field("getSongById", OptionType(SongDTO.songGraphQL), arguments = id :: Nil, resolve = context => context.ctx.getById(context arg id))
       )
     )
   val songSchema: Schema[SongService, Unit] = Schema(songQueryType)

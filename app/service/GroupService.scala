@@ -35,7 +35,8 @@ object GroupService {
     for {
       groups <- GroupRepository.getAllById(ids.toList)
       groupIds = groups.map(group => group.id)
-      res <- Future.sequence(groupIds.map(id => getById(id)))
+      groupsDTO <- Future.sequence(groupIds.map(id => getById(id)))
+      res = groupsDTO.flatten
     } yield res
   }
 
@@ -43,7 +44,8 @@ object GroupService {
     for {
       groups <- GroupRepository.getAll()
       groupsIds = groups.map(group => group.id)
-      res <- Future.sequence(groupsIds.map(id => getById(id)))
+      groupsDTO <- Future.sequence(groupsIds.map(id => getById(id)))
+      res = groupsDTO.flatten
     } yield res
   }
 }

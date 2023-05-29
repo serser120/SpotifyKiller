@@ -1,17 +1,16 @@
 package controllers
-import graphql.{GroupSchema, MainSchema}
+import graphql.{AlbumContext, GroupContext, GroupSchema, MainContext, MainSchema, SingerContext, SongContext, SongSchema}
 import play.api.libs.json._
 import play.api.mvc._
 import sangria.execution._
-import sangria.parser.{QueryParser, SyntaxError}
 import sangria.marshalling.playJson._
+import sangria.parser.{QueryParser, SyntaxError}
 import service.GroupService
 
+import javax.inject._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import javax.inject._
-import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContext.Implicits.global
 
 
 
@@ -39,9 +38,9 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
   def executeGraphQLQuery(query: String, vars: Option[JsObject], op: Option[String]) =
     QueryParser.parse(query) match {
       case Success(queryAst) => Executor.execute(
-        GroupSchema.groupSchema,
-        queryAst,
-        userContext = GroupService(),
+        schema = MainSchema(songSchema = SongSchema.songSchema, albumSchema = ???, singerSchema = ???, groupSchema = GroupSchema.groupSchema),
+        queryAst = queryAst,
+        userContext = MainContext,
         operationName = op,
         variables = vars getOrElse Json.obj())
         .map(Ok(_)).recover {
