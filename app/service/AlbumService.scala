@@ -1,16 +1,21 @@
 package service
 
 import dto.AlbumDTO
-import repository.{AlbumRepository, AlbumsSongsRepository}
+import models._
+import repository.{AlbumRepository, AlbumsSongsRepository, GroupsAlbumsRepository, SingersAlbumsRepository}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.reflect.ClassManifestFactory.Nothing
 
-class AlbumService{
+class AlbumService {
   def getById(id: Long) = AlbumService.getById(id)
+
   def getAllById(ids: Seq[Long]) = AlbumService.getAllById(ids)
+
   def getAll = AlbumService.getAll()
 }
+
 object AlbumService {
 
   def getById(id: Long) = {
@@ -44,4 +49,19 @@ object AlbumService {
       res = albumsDTO.flatten
     } yield res
   }
+
+//  def add(albumDTO: AlbumDTO) = {
+//    for {
+//      temp1 <- AlbumRepository.add(MusicianPerformer(id = 0, name = albumDTO.name, photo = albumDTO.photo, numOfPlays = albumDTO.numOfPlays))
+//      finded <- AlbumRepository.findByAlbum(albumDTO.numOfPlays, albumDTO.name)
+//      id = finded match {
+//        case Some(value) => value.id
+//        case None => 0L
+//      }
+//      songsIds = albumDTO.songs.map(_.id)
+//      temp2 = songsIds.map(songId => AlbumsSongsRepository.add(AlbumsSongs(albumId = id, songId = songId)))
+//      res <- getById(id)
+//    } yield res
+//  }
+
 }

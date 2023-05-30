@@ -15,7 +15,8 @@ import scala.util.{Failure, Success}
 
 
 @Singleton
-class HomeController @Inject()(val controllerComponents: ControllerComponents) extends BaseController {
+class HomeController @Inject()(val controllerComponents: ControllerComponents,
+                               mainSchema: MainSchema) extends BaseController {
 
   def index(): Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
     Redirect(routes.HomeController.graphql)
@@ -38,9 +39,8 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
   def executeGraphQLQuery(query: String, vars: Option[JsObject], op: Option[String]) =
     QueryParser.parse(query) match {
       case Success(queryAst) => Executor.execute(
-        schema = MainSchema(songSchema = SongSchema.songSchema, albumSchema = ???, singerSchema = ???, groupSchema = GroupSchema.groupSchema),
+        schema = mainSchema.schema,
         queryAst = queryAst,
-        userContext = MainContext,
         operationName = op,
         variables = vars getOrElse Json.obj())
         .map(Ok(_)).recover {

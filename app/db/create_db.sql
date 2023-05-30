@@ -89,3 +89,53 @@ create table albums_songs
 );
 alter table albums_songs
     add constraint albums_songs_pk primary key (album_id, song_id);
+
+insert into songs(name, photo, length, song) VALUES ('Sonne', '0x010203', 111, '0x010203');
+insert into songs(name, photo, length, song) VALUES ('Deutschland', '0x010203', 222, '0x010203');
+insert into songs(name, photo, length, song) VALUES ('Moskau', '0x010203', 333, '0x010203');
+insert into songs(name, photo, length, song) VALUES ('Совпадения', '0x010203', 444, '0x010203');
+insert into songs(name, photo, length, song) VALUES ('Mastermind', '0x010203', 555, '0x010203');
+
+insert into albums(name, photo, number_of_plays) VALUES ('Вижу', '0x010203', 111);
+insert into albums(name, photo, number_of_plays) VALUES ('Mutter', '0x010203', 222);
+insert into albums(name, photo, number_of_plays) VALUES ('Rammstein', '0x010203', 333);
+insert into albums(name, photo, number_of_plays) VALUES ('Reise, Reise', '0x010203', 444);
+insert into albums(name, photo, number_of_plays) VALUES ('Mastermind', '0x010203', 555);
+
+insert into singers(name, photo, number_of_plays) VALUES ('Till Lindemann', '0x010203', 111);
+insert into singers(name, photo, number_of_plays) VALUES ('PALC', '0x010203', 222);
+insert into singers(name, photo, number_of_plays) VALUES ('Дарья Павлович', '0x010203', 333);
+
+insert into groups(name, photo, number_of_plays) VALUES ('Tardigrade Inferno', '0x010203', 333);
+insert into groups(name, photo, number_of_plays) VALUES ('Rammstein', '0x010203', 111);
+
+insert into groups_singers(group_id, singer_id) values (1, 3);
+insert into groups_singers(group_id, singer_id) values (2, 1);
+
+insert into groups_albums(group_id, album_id) values (1, 5);
+insert into groups_albums(group_id, album_id) values (2, 2);
+insert into groups_albums(group_id, album_id) values (2, 3);
+insert into groups_albums(group_id, album_id) values (2, 4);
+
+insert into groups_songs(group_id, song_id) values (1, 5);
+insert into groups_songs(group_id, song_id) values (2, 1);
+insert into groups_songs(group_id, song_id) values (2, 2);
+insert into groups_songs(group_id, song_id) values (2, 3);
+
+insert into singers_albums(singer_id, album_id) values (1, 2);
+insert into singers_albums(singer_id, album_id) values (1, 3);
+insert into singers_albums(singer_id, album_id) values (1, 4);
+insert into singers_albums(singer_id, album_id) values (2, 1);
+insert into singers_albums(singer_id, album_id) values (3, 5);
+
+insert into singers_songs(singer_id, song_id) values (1, 1);
+insert into singers_songs(singer_id, song_id) values (1, 2);
+insert into singers_songs(singer_id, song_id) values (1, 3);
+insert into singers_songs(singer_id, song_id) values (2, 4);
+insert into singers_songs(singer_id, song_id) values (3, 5);
+
+insert into albums_songs(album_id, song_id) values (1, 4);
+insert into albums_songs(album_id, song_id) values (2, 1);
+insert into albums_songs(album_id, song_id) values (3, 2);
+insert into albums_songs(album_id, song_id) values (4, 3);
+insert into albums_songs(album_id, song_id) values (5, 5);

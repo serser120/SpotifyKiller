@@ -17,6 +17,8 @@ object GroupsSongsRepository {
   def getAllByGroupId(groupId: Long): Future[Seq[GroupsSongs]] = db.run(groupsSongsTableQuery.filter(_.groupId === groupId).result)
   def add(q: GroupsSongs): Future[Int]= db.run(groupsSongsTableQuery += q)
   def delete(groupsSongs: GroupsSongs): Future[Int] = db.run(groupsSongsTableQuery.filter(_.groupId === groupsSongs.groupId).filter(_.songId === groupsSongs.songId).delete)
+  def deleteAllByGroupId(id: Long): Future[Int] = db.run(groupsSongsTableQuery.filter(_.groupId === id).delete)
+  def deleteAllBySongId(id: Long): Future[Int] = db.run(groupsSongsTableQuery.filter(_.songId === id).delete)
 }
 
 

@@ -8,20 +8,13 @@ import sangria.util.tag.@@
 import service.SingerService
 
 case class SingerSchema() {
-  implicit val songHasId = HasId[SingerDTO, Long](_.id)
-  val id = Argument("id", LongType)
-  val ids: Argument[Seq[Long @@ FromInput.CoercedScalaResult]] = Argument("ids", ListInputType(LongType))
+  implicit val singerHasId = HasId[SingerDTO, Long](_.id)
 
-  val singerQueryType = ObjectType(
-    name = "singerQuery",
-    fields = fields[SingerService, Unit](
-      Field("getAllSingers", ListType(SingerDTO.singerGraphQL), resolve = context => context.ctx.getAll),
-      Field("getAllSingersById", ListType(SingerDTO.singerGraphQL), arguments = ids :: Nil, resolve = context => context.ctx.getAllById(context arg ids)),
-      Field("getSingerById", OptionType(SingerDTO.singerGraphQL), arguments = id :: Nil, resolve = context => context.ctx.getById(context arg id))
-    )
+  val singerQueryType: Seq[Field[Unit, Unit]] = Seq(
+      Field("getAllSingers", ListType(SingerDTO.singerGraphQL), resolve = _ => SingerService.getAll),
+//      Field("getAllSingersById", ListType(SingerDTO.singerGraphQL), arguments = List(Argument("id", LongType)), resolve = context => SingerService.getAllById(context.args.arg[Seq[Long]]("id"))),
+      Field("getSingerById", OptionType(SingerDTO.singerGraphQL), arguments = List(Argument("id", LongType)), resolve = context => SingerService.getById(context.args.arg[Long]("id")))
   )
-  val singerSchema: Schema[SingerService, Unit] = Schema(singerQueryType)
-
 }
 
 case class SingerContext(context: SingerService)

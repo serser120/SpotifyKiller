@@ -1,5 +1,6 @@
 package graphql
 
+import com.google.inject.Inject
 import dto.{AlbumDTO, SingerDTO, SongDTO}
 import sangria.execution.deferred.{Fetcher, HasId}
 import sangria.macros.derive.{ReplaceInputField, deriveInputObjectType, deriveObjectType}
@@ -8,23 +9,15 @@ import sangria.schema._
 import sangria.util.tag.@@
 import service.SongService
 
-case class SongSchema() {
+case class SongSchema @Inject()(songService: SongService) {
 
   implicit lazy val songHasId = HasId[SongDTO, Long](_.id)
 
-  val id = Argument("id", LongType)
-  val ids: Argument[Seq[Long @@ FromInput.CoercedScalaResult]] = Argument("ids", ListInputType(LongType))
-
-  val songQueryType = ObjectType[SongService, Unit](
-    name = "songQuery",
-    fields = fields[SongService, Unit](
-      Field("getAllSongs", ListType(SongDTO.songGraphQL), resolve = context => context.ctx.getAll),
-      Field("getAllSongsById", ListType(SongDTO.songGraphQL), arguments = ids :: Nil, resolve = context => context.ctx.getAllById(context arg ids)),
-      Field("getSongById", OptionType(SongDTO.songGraphQL), arguments = id :: Nil, resolve = context => context.ctx.getById(context arg id))
-      )
-    )
-  val songSchema: Schema[SongService, Unit] = Schema(songQueryType)
-
+  val songQueryType: Seq[Field[Unit, Unit]] = Seq(
+    Field("getAllSongs", ListType(SongDTO.songGraphQL), resolve = _ => SongService.getAll),
+    Field("getSongById", OptionType(SongDTO.songGraphQL), arguments = List(Argument("id", LongType)), resolve = context => SongService.getById(context.args.arg[Long]("id"))),
+//    Field("getAllSongsById", ListType(SongDTO.songGraphQL), arguments = List(Argument("id", LongType)), resolve = context => SongService.getAllById(context.args.arg[Seq[Long]]("id")))
+  )
 }
 
 case class SongContext(context: SongService)
