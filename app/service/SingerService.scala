@@ -1,12 +1,11 @@
 package service
 
 import dto.SingerDTO
-import repository.{SingerRepository, SingersAlbumsRepository, SingersSongsRepository}
-import service.GroupService.getById
+import repository.{GroupsSingersRepository, SingerRepository, SingersAlbumsRepository, SingersSongsRepository}
+import models.MusicianPerformer
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 class SingerService{
   def getById(id: Long) = SingerService.getById(id)
@@ -46,6 +45,35 @@ object SingerService {
       singersIds = singers.map(singer => singer.id)
       singersDTO <- Future.sequence(singersIds.map(id => getById(id)))
       res = singersDTO.flatten
+    } yield res
+  }
+
+  def add(name: String, photo: Array[Byte], numOfPlays: Long) = {
+    for {
+      temp1 <- SingerRepository.add(MusicianPerformer(id = 0, name = name, photo = photo, numOfPlays = numOfPlays))
+      finded <- SingerRepository.findBySinger(numOfPlays, name)
+      id = finded match {
+        case Some(value) => value.id
+        case None => 0L
+      }
+      res <- SingerService.getById(id)
+    } yield res
+  }
+
+  def update(id: Long, name: String, photo: Array[Byte], numOfPlays: Long) = {
+    for {
+      temp <- SingerRepository.update(id, MusicianPerformer(id = id, name = name, photo = photo, numOfPlays = numOfPlays))
+      res <- SingerService.getById(id)
+    } yield res
+  }
+
+  def delete(id: Long) = {
+    for {
+      answer <- SingerRepository.delete(id)
+      temp1 <- SingersSongsRepository.deleteAllBySingerId(id)
+      temp2 <- SingersAlbumsRepository.deleteAllBySingerId(id)
+      temp3 <- GroupsSingersRepository.deleteAllBySingerId(id)
+      res = if (answer == 0) None else Option(id)
     } yield res
   }
 }

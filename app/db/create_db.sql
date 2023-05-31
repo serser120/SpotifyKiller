@@ -49,6 +49,8 @@ create table singers_songs
 );
 alter table singers_songs
     add constraint singers_songs_pk primary key (singer_id, song_id);
+alter table singers_songs
+    add constraint singers_songs_con check ( not (singer_id is null and singers_songs.song_id is null));
 
 create table singers_albums
 (
@@ -57,6 +59,8 @@ create table singers_albums
 );
 alter table singers_albums
     add constraint singers_albums_pk primary key (singer_id, album_id);
+alter table singers_albums
+    add constraint singers_albums_con check ( not (singer_id is null and album_id is null));
 
 create table groups_singers
 (
@@ -65,6 +69,8 @@ create table groups_singers
 );
 alter table groups_singers
     add constraint groups_singers_pk primary key (group_id, singer_id);
+alter table groups_singers
+    add constraint groups_singers_con check ( not (group_id is null and singer_id is null));
 
 create table groups_songs
 (
@@ -73,6 +79,8 @@ create table groups_songs
 );
 alter table groups_songs
     add constraint groups_songs_pk primary key (group_id, song_id);
+alter table groups_songs
+    add constraint groups_songs_con check ( not (group_id is null and song_id is null));
 
 create table groups_albums
 (
@@ -81,6 +89,8 @@ create table groups_albums
 );
 alter table groups_albums
     add constraint groups_albums_pk primary key (group_id, album_id);
+alter table groups_albums
+    add constraint groups_albums_con check ( not (group_id is null and album_id is null));
 
 create table albums_songs
 (
@@ -89,6 +99,8 @@ create table albums_songs
 );
 alter table albums_songs
     add constraint albums_songs_pk primary key (album_id, song_id);
+alter table albums_songs
+    add constraint albums_songs_con check ( not (album_id is null and song_id is null));
 
 insert into songs(name, photo, length, song) VALUES ('Sonne', '0x010203', 111, '0x010203');
 insert into songs(name, photo, length, song) VALUES ('Deutschland', '0x010203', 222, '0x010203');

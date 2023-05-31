@@ -2,17 +2,21 @@ package service
 
 import dto.SongDTO
 import repository.{SongRepository, _}
-import models.Song
+import models._
+import service.IdsValidator
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.impl.Promise
 
-class SongService{
+class SongService {
   def getById(id: Long) = SongService.getById(id)
+
   def getAllById(ids: Seq[Long]) = SongService.getAllById(ids)
+
   def getAll = SongService.getAll()
 }
+
 object SongService {
   def getById(id: Long) = {
     for {
@@ -40,10 +44,10 @@ object SongService {
     } yield res
   }
 
-  def add(songDTO: SongDTO)= {
+  def add(name: String, photo: Array[Byte], length: Int, song: Array[Byte]) = {
     for {
-      temp <- SongRepository.add(Song(id = 0, name = songDTO.name, photo = songDTO.photo, length = songDTO.length, song = songDTO.song))
-      finded <- SongRepository.findBySong(songDTO.length, songDTO.name)
+      temp <- SongRepository.add(Song(id = 0, name = name, photo = photo, length = length, song = song))
+      finded <- SongRepository.findBySong(length, name)
       res = finded match {
         case Some(value) => {
           Option(SongDTO(id = value.id, name = value.name, photo = value.photo, length = value.length, song = value.song))
@@ -53,26 +57,44 @@ object SongService {
     } yield res
   }
 
-  def update(id: Long, songDTO: SongDTO) = {
+  def update(id: Long, name: String, photo: Array[Byte], length: Int, song: Array[Byte]) = {
     for {
-      temp <- SongRepository.update(id, Song(id = 0, name = songDTO.name, photo = songDTO.photo, length = songDTO.length, song = songDTO.song))
-      finded <- SongRepository.findBySong(songDTO.length, songDTO.name)
-      res = finded match {
-        case Some(value) => {
-          Option(SongDTO(id = value.id, name = value.name, photo = value.photo, length = value.length, song = value.song))
-        }
-        case None => None
+      songFlag <- IdsValidator.songIdValidate(id)
+      res = if (songFlag) {
+        SongRepository.update(id, Song(id = id, name = name, photo = photo, length = length, song = song))
+        "Success"
+      } else {
+        "Cant update this id"
       }
     } yield res
   }
 
   def delete(id: Long) = {
     for {
-      answer <- SongRepository.delete(id)
-      temp1 <- AlbumsSongsRepository.deleteAllBySongId(id)
-      temp2 <- SingersSongsRepository.deleteAllBySongsId(id)
-      temp3 <- GroupsSongsRepository.deleteAllBySongId(id)
-      res = if(answer == 0) None else Option(id)
+      songFlag <- IdsValidator.songIdValidate(id)
+      res = if (songFlag) {
+        SongRepository.delete(id)
+        AlbumsSongsRepository.deleteAllBySongId(id)
+        SingersSongsRepository.deleteAllBySongsId(id)
+        GroupsSongsRepository.deleteAllBySongId(id)
+        "Success"
+      } else {
+        "Cant delete this id"
+      }
+    } yield res
+  }
+
+  def addSongToAlbum(songId: Long, albumId: Long) = {
+    for {
+      songFlag <- IdsValidator.songIdValidate(songId)
+      albumFlag <- IdsValidator.albumIdValidate(songId)
+      albumsSongsFlag <- IdsValidator.albumsSongsIdValidate(albumId, songId)
+      res = if (songFlag && albumFlag && !albumsSongsFlag) {
+        AlbumsSongsRepository.add(AlbumsSongs(albumId, songId))
+        "Success"
+      } else {
+        "Cant add this ids"
+      }
     } yield res
   }
 

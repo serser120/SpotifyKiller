@@ -19,5 +19,7 @@ object GroupsSingersRepository {
   def delete(groupsSingers: GroupsSingers): Future[Int] = db.run(groupsSingersTableQuery.filter(_.groupId === groupsSingers.groupId).filter(_.singerId === groupsSingers.singerId).delete)
   def deleteAllByGroupId(id: Long): Future[Int] = db.run(groupsSingersTableQuery.filter(_.groupId === id).delete)
   def deleteAllBySingerId(id: Long): Future[Int] = db.run(groupsSingersTableQuery.filter(_.singerId === id).delete)
+  def getById(groupId: Long, singerId:Long): Future[Option[GroupsSingers]] = db.run(groupsSingersTableQuery.filter(_.singerId === singerId).filter(_.groupId === groupId).result.headOption)
+
 }
 

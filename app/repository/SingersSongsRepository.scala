@@ -19,4 +19,6 @@ object SingersSongsRepository {
   def delete(q: SingersSongs): Future[Int] = db.run(singersSongsTableQuery.filter(_.singerId === q.singerId).filter(_.songId === q.songId).delete)
   def deleteAllBySingerId(id: Long): Future[Int] = db.run(singersSongsTableQuery.filter(_.singerId === id).delete)
   def deleteAllBySongsId(id: Long): Future[Int] = db.run(singersSongsTableQuery.filter(_.songId === id).delete)
+  def getById(singerId: Long, songId:Long): Future[Option[SingersSongs]] = db.run(singersSongsTableQuery.filter(_.singerId === singerId).filter(_.songId === songId).result.headOption)
+
 }
