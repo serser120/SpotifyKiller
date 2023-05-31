@@ -19,11 +19,17 @@ case class SongSchema @Inject()(songService: SongService) {
       fieldType = OptionType(SongDTO.songGraphQL),
       arguments = List(Argument("id", LongType)),
       resolve = context => SongService.getById(context.args.arg[Long]("id"))),
+    Field(name = "getSongByName",
+      fieldType = ListType(SongDTO.songGraphQL),
+      arguments = Argument("name", StringType) :: Nil,
+      resolve = context => SongService.getByName(context.args.arg[String]("name")))
     //    Field("getAllSongsById", ListType(SongDTO.songGraphQL), arguments = List(Argument("id", LongType)), resolve = context => SongService.getAllById(context.args.arg[Seq[Long]]("id")))
   )
 
   val songIdArg1 = Argument("songId", LongType)
   val albumIdArg = Argument("albumId", LongType)
+  val singerIdArg = Argument("singerId", LongType)
+  val groupIdArg = Argument("groupId", LongType)
   val nameArg = Argument("name", StringType)
   val photoArg = Argument("photo", ByteArray)
   val lengthArg = Argument("length", IntType)
@@ -68,6 +74,51 @@ case class SongSchema @Inject()(songService: SongService) {
       resolve = context => SongService.addSongToAlbum(
         context.args.arg[Long]("songId"),
         context.args.arg[Long]("albumId")
+      )
+    ),
+    Field(
+      name = "deleteSongFromAlbum",
+      fieldType = OptionType(StringType),
+      arguments = songIdArg1 :: albumIdArg :: Nil,
+      resolve = context => SongService.deleteSongFromAlbum(
+        context.args.arg[Long]("songId"),
+        context.args.arg[Long]("albumId")
+      )
+    ),
+    Field(
+      name = "addSongToSinger",
+      fieldType = OptionType(StringType),
+      arguments = songIdArg1 :: singerIdArg :: Nil,
+      resolve = context => SongService.addSongToSinger(
+        context.args.arg[Long]("songId"),
+        context.args.arg[Long]("singerId")
+      )
+    ),
+    Field(
+      name = "deleteSongFromSinger",
+      fieldType = OptionType(StringType),
+      arguments = songIdArg1 :: singerIdArg :: Nil,
+      resolve = context => SongService.deleteSongFromSinger(
+        context.args.arg[Long]("songId"),
+        context.args.arg[Long]("singerId")
+      )
+    ),
+    Field(
+      name = "addSongToGroup",
+      fieldType = OptionType(StringType),
+      arguments = songIdArg1 :: groupIdArg :: Nil,
+      resolve = context => SongService.addSongToGroup(
+        context.args.arg[Long]("songId"),
+        context.args.arg[Long]("groupId")
+      )
+    ),
+    Field(
+      name = "deleteSongFromGroup",
+      fieldType = OptionType(StringType),
+      arguments = songIdArg1 :: groupIdArg :: Nil,
+      resolve = context => SongService.deleteSongFromGroup(
+        context.args.arg[Long]("songId"),
+        context.args.arg[Long]("groupId")
       )
     )
   )

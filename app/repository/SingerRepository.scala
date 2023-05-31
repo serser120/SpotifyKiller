@@ -17,4 +17,6 @@ object SingerRepository {
   def update(id: Long, singer: MusicianPerformer): Future[Int] = db.run(singerTableQuery.filter(_.id === id).update(singer))
   def delete(id: Long): Future[Int] = db.run(singerTableQuery.filter(_.id === id).delete)
   def findBySinger(numOfPlays: Long, name: String): Future[Option[MusicianPerformer]] = db.run(singerTableQuery.filter(_.numOfPlays === numOfPlays).filter (_.name.like(name)).result.headOption)
+  def findByName(name: String): Future[Seq[MusicianPerformer]] = db.run(singerTableQuery.filter(_.name.like("%" + name + "%")).result)
+
 }

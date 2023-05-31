@@ -2,11 +2,11 @@ package service
 
 import dto.AlbumDTO
 import models._
-import repository.{AlbumRepository, AlbumsSongsRepository, GroupsAlbumsRepository, SingersAlbumsRepository}
+import repository.{AlbumRepository, AlbumsSongsRepository, GroupsAlbumsRepository, GroupsSingersRepository, SingersAlbumsRepository}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.reflect.ClassManifestFactory.Nothing
+import scala.reflect.ClassManifestFactory.{Nothing, arrayType}
 
 class AlbumService {
   def getById(id: Long) = AlbumService.getById(id)
@@ -79,4 +79,68 @@ object AlbumService {
     } yield res
   }
 
+  def addAlbumToSinger(albumId: Long, singerId: Long) = {
+    for {
+      albumFlag <- IdsValidator.albumIdValidate(albumId)
+      singerFlag <- IdsValidator.singerIdValidate(singerId)
+      albumsSingersFlag <- IdsValidator.singersAlbumsIdValidate(singerId, albumId)
+      res = if (albumFlag && singerFlag && !albumsSingersFlag) {
+        SingersAlbumsRepository.add(SingersAlbums(singerId, albumId))
+        "Success"
+      } else {
+        "Cant add this ids"
+      }
+    } yield res
+  }
+
+  def deleteAlbumFromSinger(albumId: Long, singerId: Long) = {
+    for {
+      albumFlag <- IdsValidator.albumIdValidate(albumId)
+      singerFlag <- IdsValidator.singerIdValidate(singerId)
+      albumsSingersFlag <- IdsValidator.singersAlbumsIdValidate(singerId, albumId)
+      res = if (albumFlag && singerFlag && albumsSingersFlag) {
+        SingersAlbumsRepository.delete(SingersAlbums(singerId, albumId))
+        "Success"
+      } else {
+        "Cant delete this ids"
+      }
+    } yield res
+  }
+
+  def addAlbumToGroup(albumId: Long, groupId: Long) = {
+    for {
+      albumFlag <- IdsValidator.albumIdValidate(albumId)
+      groupFlag <- IdsValidator.groupIdValidate(groupId)
+      albumsGroupsFlag <- IdsValidator.groupsAlbumsIdValidate(groupId, albumId)
+      res = if (albumFlag && groupFlag && !albumsGroupsFlag) {
+        GroupsAlbumsRepository.add(GroupsAlbums(groupId, albumId))
+        "Success"
+      } else {
+        "Cant add this ids"
+      }
+    } yield res
+  }
+
+  def deleteAlbumFromGroup(albumId: Long, groupId: Long) = {
+    for {
+      albumFlag <- IdsValidator.albumIdValidate(albumId)
+      groupFlag <- IdsValidator.groupIdValidate(groupId)
+      albumsGroupsFlag <- IdsValidator.groupsAlbumsIdValidate(groupId, albumId)
+      res = if (albumFlag && groupFlag && albumsGroupsFlag) {
+        GroupsAlbumsRepository.delete(GroupsAlbums(groupId, albumId))
+        "Success"
+      } else {
+        "Cant delete this ids"
+      }
+    } yield res
+  }
+
+  def getByName(name: String) = {
+    for {
+      albums <- AlbumRepository.findByName(name)
+      albumsIds = albums.map(album => album.id)
+      albumsDTO <- Future.sequence(albumsIds.map(id => getById(id)))
+      res = albumsDTO.flatten
+    } yield res
+  }
 }

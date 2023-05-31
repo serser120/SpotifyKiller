@@ -17,5 +17,6 @@ object GroupRepository {
   def update(id: Long, group: MusicianPerformer): Future[Int] = db.run(groupTableQuery.filter(_.id === id).update(group))
   def delete(id: Long): Future[Int] = db.run(groupTableQuery.filter(_.id === id).delete)
   def findByGroup(numOfPlays: Long, name: String): Future[Option[MusicianPerformer]] = db.run(groupTableQuery.filter(_.numOfPlays === numOfPlays).filter (_.name.like(name)).result.headOption)
+  def findByName(name: String): Future[Seq[MusicianPerformer]] = db.run(groupTableQuery.filter(_.name.like("%" + name + "%")).result)
 
 }

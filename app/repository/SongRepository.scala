@@ -17,4 +17,6 @@ object SongRepository {
   def update(id: Long, song: Song): Future[Int] = db.run(songTableQuery.filter(_.id === id).update(song))
   def delete(id: Long)= db.run(songTableQuery.filter(_.id === id).delete)
   def findBySong(length: Int, name: String): Future[Option[Song]] = db.run(songTableQuery.filter(_.length === length).filter (_.name.like(name)).result.headOption)
+  def findByName(name: String): Future[Seq[Song]] = db.run(songTableQuery.filter(_.name.like("%"+ name + "%")).result)
+
 }

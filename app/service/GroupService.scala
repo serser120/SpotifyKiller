@@ -78,4 +78,13 @@ object GroupService {
       res = if (answer == 0) None else Option(id)
     } yield res
   }
+
+  def getByName(name: String) = {
+    for {
+      groups <- GroupRepository.findByName(name)
+      groupsIds = groups.map(group => group.id)
+      groupsDTO <- Future.sequence(groupsIds.map(id => getById(id)))
+      res = groupsDTO.flatten
+    } yield res
+  }
 }

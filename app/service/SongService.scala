@@ -87,7 +87,7 @@ object SongService {
   def addSongToAlbum(songId: Long, albumId: Long) = {
     for {
       songFlag <- IdsValidator.songIdValidate(songId)
-      albumFlag <- IdsValidator.albumIdValidate(songId)
+      albumFlag <- IdsValidator.albumIdValidate(albumId)
       albumsSongsFlag <- IdsValidator.albumsSongsIdValidate(albumId, songId)
       res = if (songFlag && albumFlag && !albumsSongsFlag) {
         AlbumsSongsRepository.add(AlbumsSongs(albumId, songId))
@@ -98,4 +98,80 @@ object SongService {
     } yield res
   }
 
+  def deleteSongFromAlbum(songId: Long, albumId: Long) = {
+    for {
+      songFlag <- IdsValidator.songIdValidate(songId)
+      albumFlag <- IdsValidator.albumIdValidate(albumId)
+      albumsSongsFlag <- IdsValidator.albumsSongsIdValidate(albumId, songId)
+      res = if (songFlag && albumFlag && albumsSongsFlag) {
+        AlbumsSongsRepository.delete(AlbumsSongs(albumId, songId))
+        "Success"
+      } else {
+        "Cant delete this ids"
+      }
+    } yield res
+  }
+
+  def addSongToSinger(songId: Long, singerId: Long) = {
+    for {
+      songFlag <- IdsValidator.songIdValidate(songId)
+      singerFlag <- IdsValidator.singerIdValidate(singerId)
+      singersSongsFlag <- IdsValidator.singersSongsIdValidate(singerId, songId)
+      res = if (songFlag && singerFlag && !singersSongsFlag) {
+        SingersSongsRepository.add(SingersSongs(singerId, songId))
+        "Success"
+      } else {
+        "Cant add this ids"
+      }
+    } yield res
+  }
+
+  def deleteSongFromSinger(songId: Long, singerId: Long) = {
+    for {
+      songFlag <- IdsValidator.songIdValidate(songId)
+      singerFlag <- IdsValidator.singerIdValidate(singerId)
+      singersSongsFlag <- IdsValidator.singersSongsIdValidate(singerId, songId)
+      res = if (songFlag && singerFlag && singersSongsFlag) {
+        SingersSongsRepository.delete(SingersSongs(singerId, songId))
+        "Success"
+      } else {
+        "Cant delete this ids"
+      }
+    } yield res
+  }
+
+  def addSongToGroup(songId: Long, groupId: Long) = {
+    for {
+      songFlag <- IdsValidator.songIdValidate(songId)
+      groupFlag <- IdsValidator.groupIdValidate(groupId)
+      groupsSongsFlag <- IdsValidator.groupsSongsIdValidate(groupId, songId)
+      res = if (songFlag && groupFlag && !groupsSongsFlag) {
+        GroupsSongsRepository.add(GroupsSongs(groupId, songId))
+        "Success"
+      } else {
+        "Cant add this ids"
+      }
+    } yield res
+  }
+
+  def deleteSongFromGroup(songId: Long, groupId: Long) = {
+    for {
+      songFlag <- IdsValidator.songIdValidate(songId)
+      groupFlag <- IdsValidator.groupIdValidate(groupId)
+      groupsSongsFlag <- IdsValidator.groupsSongsIdValidate(groupId, songId)
+      res = if (songFlag && groupFlag && groupsSongsFlag) {
+        GroupsSongsRepository.delete(GroupsSongs(groupId, songId))
+        "Success"
+      } else {
+        "Cant delete this ids"
+      }
+    } yield res
+  }
+
+  def getByName(name: String) = {
+    for {
+      songs <- SongRepository.findByName(name)
+      res = songs.map(value => SongDTO(id = value.id, name = value.name, photo = value.photo, length = value.length, song = value.song))
+    } yield res
+  }
 }

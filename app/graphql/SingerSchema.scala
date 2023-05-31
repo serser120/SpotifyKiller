@@ -10,12 +10,28 @@ case class SingerSchema() {
   implicit val singerHasId = HasId[SingerDTO, Long](_.id)
 
   val singerQueryType: Seq[Field[Unit, Unit]] = Seq(
-    Field("getAllSingers", ListType(SingerDTO.singerGraphQL), resolve = _ => SingerService.getAll),
+    Field(
+      name = "getAllSingers",
+      fieldType = ListType(SingerDTO.singerGraphQL),
+      resolve = _ => SingerService.getAll
+    ),
     //      Field("getAllSingersById", ListType(SingerDTO.singerGraphQL), arguments = List(Argument("id", LongType)), resolve = context => SingerService.getAllById(context.args.arg[Seq[Long]]("id"))),
-    Field("getSingerById", OptionType(SingerDTO.singerGraphQL), arguments = List(Argument("id", LongType)), resolve = context => SingerService.getById(context.args.arg[Long]("id")))
+    Field(
+      name = "getSingerById",
+      fieldType = OptionType(SingerDTO.singerGraphQL),
+      arguments = List(Argument("id", LongType)),
+      resolve = context => SingerService.getById(context.args.arg[Long]("id"))
+    ),
+    Field(
+      name = "getSingerByName",
+      fieldType = ListType(SingerDTO.singerGraphQL),
+      arguments = Argument("name", StringType) :: Nil,
+      resolve = context => SingerService.getByName(context.args.arg[String]("name"))
+    )
   )
 
-  val idArg = Argument("id", LongType)
+  val singerIdArg = Argument("singerId", LongType)
+  val groupIdArg = Argument("groupId", LongType)
   val nameArg = Argument("name", StringType)
   val photoArg = Argument("photo", ByteArray)
   val numOfPlaysArg = Argument("numOfPlays", LongType)
@@ -34,9 +50,9 @@ case class SingerSchema() {
     Field(
       name = "updateSinger",
       fieldType = OptionType(SingerDTO.singerGraphQL),
-      arguments = idArg :: nameArg :: photoArg :: numOfPlaysArg :: Nil,
+      arguments = singerIdArg :: nameArg :: photoArg :: numOfPlaysArg :: Nil,
       resolve = context => SingerService.update(
-        context.args.arg[Long]("id"),
+        context.args.arg[Long]("singerId"),
         context.args.arg[String]("name"),
         context.args.arg[Array[Byte]]("photo"),
         context.args.arg[Long]("numOfPlays")
@@ -45,9 +61,27 @@ case class SingerSchema() {
     Field(
       name = "deleteSinger",
       fieldType = OptionType(LongType),
-      arguments = idArg :: Nil,
+      arguments = singerIdArg :: Nil,
       resolve = context => SingerService.delete(
-        context.args.arg[Long]("id")
+        context.args.arg[Long]("singerId")
+      )
+    ),
+    Field(
+      name = "addSingerToGroup",
+      fieldType = OptionType(StringType),
+      arguments = singerIdArg :: groupIdArg :: Nil,
+      resolve = context => SingerService.addSingerToGroup(
+        context.args.arg[Long]("singerId"),
+        context.args.arg[Long]("groupId")
+      )
+    ),
+    Field(
+      name = "deleteSingerFromGroup",
+      fieldType = OptionType(StringType),
+      arguments = singerIdArg :: groupIdArg :: Nil,
+      resolve = context => SingerService.deleteSingerFromGroup(
+        context.args.arg[Long]("singerId"),
+        context.args.arg[Long]("groupId")
       )
     )
   )

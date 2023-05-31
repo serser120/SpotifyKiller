@@ -2,7 +2,7 @@ package service
 
 import dto.SingerDTO
 import repository.{GroupsSingersRepository, SingerRepository, SingersAlbumsRepository, SingersSongsRepository}
-import models.MusicianPerformer
+import models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -74,6 +74,43 @@ object SingerService {
       temp2 <- SingersAlbumsRepository.deleteAllBySingerId(id)
       temp3 <- GroupsSingersRepository.deleteAllBySingerId(id)
       res = if (answer == 0) None else Option(id)
+    } yield res
+  }
+
+  def addSingerToGroup(singerId: Long, groupId: Long) = {
+    for {
+      singerFlag <- IdsValidator.albumIdValidate(singerId)
+      groupFlag <- IdsValidator.groupIdValidate(groupId)
+      singersGroupsFlag <- IdsValidator.groupsSingersIdValidate(groupId, singerId)
+      res = if (singerFlag && groupFlag && !singersGroupsFlag) {
+        GroupsSingersRepository.add(GroupsSingers(groupId, singerId))
+        "Success"
+      } else {
+        "Cant add this ids"
+      }
+    } yield res
+  }
+
+  def deleteSingerFromGroup(singerId: Long, groupId: Long) = {
+    for {
+      singerFlag <- IdsValidator.albumIdValidate(singerId)
+      groupFlag <- IdsValidator.groupIdValidate(groupId)
+      singersGroupsFlag <- IdsValidator.groupsSingersIdValidate(groupId, singerId)
+      res = if (singerFlag && groupFlag && singersGroupsFlag) {
+        GroupsSingersRepository.delete(GroupsSingers(groupId, singerId))
+        "Success"
+      } else {
+        "Cant delete this ids"
+      }
+    } yield res
+  }
+
+  def getByName(name: String) = {
+    for {
+      singers <- SingerRepository.findByName(name)
+      singersIds = singers.map(singer => singer.id)
+      singersDTO <- Future.sequence(singersIds.map(id => getById(id)))
+      res = singersDTO.flatten
     } yield res
   }
 }
