@@ -1,13 +1,11 @@
 package service
 
 import dto.SongDTO
-import repository.{SongRepository, _}
 import models._
-import service.IdsValidator
+import models.Genres.Genre
+import repository._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.impl.Promise
 
 class SongService {
   def getById(id: Long) = SongService.getById(id)
@@ -23,7 +21,7 @@ object SongService {
       song <- SongRepository.getById(id)
       res = song match {
         case Some(value) => {
-          Option(SongDTO(id = value.id, name = value.name, photo = value.photo, length = value.length, song = value.song))
+          Option(SongDTO(id = value.id, name = value.name, photo = value.photo, length = value.length, song = value.song, genre = value.genre))
         }
         case None => None
       }
@@ -33,35 +31,35 @@ object SongService {
   def getAllById(ids: Seq[Long]) = {
     for {
       songs <- SongRepository.getAllById(ids.toList)
-      res = songs.map(value => SongDTO(id = value.id, name = value.name, photo = value.photo, length = value.length, song = value.song))
+      res = songs.map(value => SongDTO(id = value.id, name = value.name, photo = value.photo, length = value.length, song = value.song, genre = value.genre))
     } yield res
   }
 
   def getAll() = {
     for {
       songs <- SongRepository.getAll()
-      res = songs.map(value => SongDTO(id = value.id, name = value.name, photo = value.photo, length = value.length, song = value.song))
+      res = songs.map(value => SongDTO(id = value.id, name = value.name, photo = value.photo, length = value.length, song = value.song, genre = value.genre))
     } yield res
   }
 
-  def add(name: String, photo: Array[Byte], length: Int, song: Array[Byte]) = {
+  def add(name: String, photo: Array[Byte], length: Int, song: Array[Byte], genre: Genre) = {
     for {
-      temp <- SongRepository.add(Song(id = 0, name = name, photo = photo, length = length, song = song))
+      temp <- SongRepository.add(Song(id = 0, name = name, photo = photo, length = length, song = song, genre = genre))
       finded <- SongRepository.findBySong(length, name)
       res = finded match {
         case Some(value) => {
-          Option(SongDTO(id = value.id, name = value.name, photo = value.photo, length = value.length, song = value.song))
+          Option(SongDTO(id = value.id, name = value.name, photo = value.photo, length = value.length, song = value.song, genre = value.genre))
         }
         case None => None
       }
     } yield res
   }
 
-  def update(id: Long, name: String, photo: Array[Byte], length: Int, song: Array[Byte]) = {
+  def update(id: Long, name: String, photo: Array[Byte], length: Int, song: Array[Byte], genre: Genre) = {
     for {
       songFlag <- IdsValidator.songIdValidate(id)
       res = if (songFlag) {
-        SongRepository.update(id, Song(id = id, name = name, photo = photo, length = length, song = song))
+        SongRepository.update(id, Song(id = id, name = name, photo = photo, length = length, song = song, genre = genre))
         "Success"
       } else {
         "Cant update this id"
@@ -171,7 +169,7 @@ object SongService {
   def getByName(name: String) = {
     for {
       songs <- SongRepository.findByName(name)
-      res = songs.map(value => SongDTO(id = value.id, name = value.name, photo = value.photo, length = value.length, song = value.song))
+      res = songs.map(value => SongDTO(id = value.id, name = value.name, photo = value.photo, length = value.length, song = value.song, genre = value.genre))
     } yield res
   }
 }

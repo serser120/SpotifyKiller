@@ -8,6 +8,20 @@ drop table groups_singers;
 drop table groups_songs;
 drop table groups_albums;
 drop table albums_songs;
+drop type genre;
+drop type role;
+
+create type genre as enum ('Jazz', 'Rock', 'Folk', 'HipHop', 'CountryMusic', 'Blues', 'Classical', 'Reggae','Electronic', 'Funk');
+create type role as enum ('admin', 'user');
+
+create table app_user
+(
+    id       bigserial primary key,
+    login    character varying not null,
+    password character varying not null,
+    email    character varying,
+    role     role              not null
+);
 
 create table singers
 (
@@ -39,7 +53,8 @@ create table songs
     name   character varying not null,
     photo  bytea,
     length int,
-    song   bytea
+    song   bytea,
+    genre  genre             not null
 );
 
 create table singers_songs
@@ -102,52 +117,177 @@ alter table albums_songs
 alter table albums_songs
     add constraint albums_songs_con check ( not (album_id is null and song_id is null));
 
-insert into songs(name, photo, length, song) VALUES ('Sonne', '0x010203', 111, '0x010203');
-insert into songs(name, photo, length, song) VALUES ('Deutschland', '0x010203', 222, '0x010203');
-insert into songs(name, photo, length, song) VALUES ('Moskau', '0x010203', 333, '0x010203');
-insert into songs(name, photo, length, song) VALUES ('Совпадения', '0x010203', 444, '0x010203');
-insert into songs(name, photo, length, song) VALUES ('Mastermind', '0x010203', 555, '0x010203');
+create table liked_songs
+(
+    user_id bigserial not null,
+    song_id bigserial not null
+);
+alter table liked_songs
+    add constraint liked_songs_pk primary key (user_id, song_id);
+alter table liked_songs
+    add constraint liked_songs_con check ( not (user_id is null and song_id is null));
 
-insert into albums(name, photo, number_of_plays) VALUES ('Вижу', '0x010203', 111);
-insert into albums(name, photo, number_of_plays) VALUES ('Mutter', '0x010203', 222);
-insert into albums(name, photo, number_of_plays) VALUES ('Rammstein', '0x010203', 333);
-insert into albums(name, photo, number_of_plays) VALUES ('Reise, Reise', '0x010203', 444);
-insert into albums(name, photo, number_of_plays) VALUES ('Mastermind', '0x010203', 555);
+create table liked_albums
+(
+    user_id  bigserial not null,
+    album_id bigserial not null
+);
+alter table liked_albums
+    add constraint liked_albums_pk primary key (user_id, album_id);
+alter table liked_albums
+    add constraint liked_albums_con check ( not (user_id is null and album_id is null));
 
-insert into singers(name, photo, number_of_plays) VALUES ('Till Lindemann', '0x010203', 111);
-insert into singers(name, photo, number_of_plays) VALUES ('PALC', '0x010203', 222);
-insert into singers(name, photo, number_of_plays) VALUES ('Дарья Павлович', '0x010203', 333);
+create table liked_singers
+(
+    user_id   bigserial not null,
+    singer_id bigserial not null
+);
+alter table liked_singers
+    add constraint liked_singers_pk primary key (user_id, singer_id);
+alter table liked_singers
+    add constraint liked_singers_con check ( not (user_id is null and singer_id is null));
 
-insert into groups(name, photo, number_of_plays) VALUES ('Tardigrade Inferno', '0x010203', 333);
-insert into groups(name, photo, number_of_plays) VALUES ('Rammstein', '0x010203', 111);
+create table liked_groups
+(
+    user_id  bigserial not null,
+    group_id bigserial not null
+);
+alter table liked_groups
+    add constraint liked_groups_pk primary key (user_id, group_id);
+alter table liked_groups
+    add constraint liked_groups_con check ( not (user_id is null and group_id is null));
 
-insert into groups_singers(group_id, singer_id) values (1, 3);
-insert into groups_singers(group_id, singer_id) values (2, 1);
+create table song_history
+(
+    user_id      bigserial not null,
+    song_id      bigserial not null,
+    playing_date DATE
+);
+alter table song_history
+    add constraint song_history_pk primary key (user_id, song_id);
+alter table song_history
+    add constraint song_history_con check ( not (user_id is null and song_id is null));
 
-insert into groups_albums(group_id, album_id) values (1, 5);
-insert into groups_albums(group_id, album_id) values (2, 2);
-insert into groups_albums(group_id, album_id) values (2, 3);
-insert into groups_albums(group_id, album_id) values (2, 4);
+create table genre_history
+(
+    user_id      bigserial not null,
+    genre        genre     not null,
+    playing_date DATE
+);
+alter table genre_history
+    add constraint genre_history_pk primary key (user_id);
+alter table genre_history
+    add constraint genre_history_con check ( not (user_id is null and genre_history.genre is null));
 
-insert into groups_songs(group_id, song_id) values (1, 5);
-insert into groups_songs(group_id, song_id) values (2, 1);
-insert into groups_songs(group_id, song_id) values (2, 2);
-insert into groups_songs(group_id, song_id) values (2, 3);
+create table singer_history
+(
+    user_id      bigserial not null,
+    singer_id    bigserial not null,
+    playing_date DATE
+);
+alter table singer_history
+    add constraint singer_history_pk primary key (user_id, singer_id);
+alter table singer_history
+    add constraint singer_history_con check ( not (user_id is null and singer_id is null));
 
-insert into singers_albums(singer_id, album_id) values (1, 2);
-insert into singers_albums(singer_id, album_id) values (1, 3);
-insert into singers_albums(singer_id, album_id) values (1, 4);
-insert into singers_albums(singer_id, album_id) values (2, 1);
-insert into singers_albums(singer_id, album_id) values (3, 5);
+create table group_history
+(
+    user_id      bigserial not null,
+    group_id     bigserial not null,
+    playing_date DATE
+);
+alter table group_history
+    add constraint group_history_pk primary key (user_id, group_id);
+alter table group_history
+    add constraint group_history_con check ( not (user_id is null and group_id is null));
 
-insert into singers_songs(singer_id, song_id) values (1, 1);
-insert into singers_songs(singer_id, song_id) values (1, 2);
-insert into singers_songs(singer_id, song_id) values (1, 3);
-insert into singers_songs(singer_id, song_id) values (2, 4);
-insert into singers_songs(singer_id, song_id) values (3, 5);
 
-insert into albums_songs(album_id, song_id) values (1, 4);
-insert into albums_songs(album_id, song_id) values (2, 1);
-insert into albums_songs(album_id, song_id) values (3, 2);
-insert into albums_songs(album_id, song_id) values (4, 3);
-insert into albums_songs(album_id, song_id) values (5, 5);
+insert into songs(name, photo, length, song, genre)
+VALUES ('Sonne', '0x010203', 111, '0x010203', 'Rock');
+insert into songs(name, photo, length, song, genre)
+VALUES ('Deutschland', '0x010203', 222, '0x010203', 'Rock');
+insert into songs(name, photo, length, song, genre)
+VALUES ('Moskau', '0x010203', 333, '0x010203', 'Rock');
+insert into songs(name, photo, length, song, genre)
+VALUES ('Совпадения', '0x010203', 444, '0x010203', 'Rock');
+insert into songs(name, photo, length, song, genre)
+VALUES ('Mastermind', '0x010203', 555, '0x010203', 'Rock');
+
+insert into albums(name, photo, number_of_plays)
+VALUES ('Вижу', '0x010203', 111);
+insert into albums(name, photo, number_of_plays)
+VALUES ('Mutter', '0x010203', 222);
+insert into albums(name, photo, number_of_plays)
+VALUES ('Rammstein', '0x010203', 333);
+insert into albums(name, photo, number_of_plays)
+VALUES ('Reise, Reise', '0x010203', 444);
+insert into albums(name, photo, number_of_plays)
+VALUES ('Mastermind', '0x010203', 555);
+
+insert into singers(name, photo, number_of_plays)
+VALUES ('Till Lindemann', '0x010203', 111);
+insert into singers(name, photo, number_of_plays)
+VALUES ('PALC', '0x010203', 222);
+insert into singers(name, photo, number_of_plays)
+VALUES ('Дарья Павлович', '0x010203', 333);
+
+insert into groups(name, photo, number_of_plays)
+VALUES ('Tardigrade Inferno', '0x010203', 333);
+insert into groups(name, photo, number_of_plays)
+VALUES ('Rammstein', '0x010203', 111);
+
+insert into groups_singers(group_id, singer_id)
+values (1, 3);
+insert into groups_singers(group_id, singer_id)
+values (2, 1);
+
+insert into groups_albums(group_id, album_id)
+values (1, 5);
+insert into groups_albums(group_id, album_id)
+values (2, 2);
+insert into groups_albums(group_id, album_id)
+values (2, 3);
+insert into groups_albums(group_id, album_id)
+values (2, 4);
+
+insert into groups_songs(group_id, song_id)
+values (1, 5);
+insert into groups_songs(group_id, song_id)
+values (2, 1);
+insert into groups_songs(group_id, song_id)
+values (2, 2);
+insert into groups_songs(group_id, song_id)
+values (2, 3);
+
+insert into singers_albums(singer_id, album_id)
+values (1, 2);
+insert into singers_albums(singer_id, album_id)
+values (1, 3);
+insert into singers_albums(singer_id, album_id)
+values (1, 4);
+insert into singers_albums(singer_id, album_id)
+values (2, 1);
+insert into singers_albums(singer_id, album_id)
+values (3, 5);
+
+insert into singers_songs(singer_id, song_id)
+values (1, 1);
+insert into singers_songs(singer_id, song_id)
+values (1, 2);
+insert into singers_songs(singer_id, song_id)
+values (1, 3);
+insert into singers_songs(singer_id, song_id)
+values (2, 4);
+insert into singers_songs(singer_id, song_id)
+values (3, 5);
+
+insert into albums_songs(album_id, song_id)
+values (1, 4);
+insert into albums_songs(album_id, song_id)
+values (2, 1);
+insert into albums_songs(album_id, song_id)
+values (3, 2);
+insert into albums_songs(album_id, song_id)
+values (4, 3);
+insert into albums_songs(album_id, song_id)
+values (5, 5);
