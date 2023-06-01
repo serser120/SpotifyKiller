@@ -1,9 +1,9 @@
 package models
 
 import com.github.tminglei.slickpg.PgEnumSupport
-import slick.jdbc.PostgresProfile
+import models.user.Roles
 import sangria.schema._
-import sangria.macros.derive.{EnumTypeName, IncludeValues, deriveEnumType}
+import slick.jdbc.PostgresProfile
 
 object Genres extends Enumeration{
   type Genre = Value
@@ -30,4 +30,9 @@ trait MyEnumAPI extends PostgresProfile with PgEnumSupport{
   implicit val genreListTypeMapper = createEnumListJdbcType("Genre", Genres)
   implicit val genreColumnExtensionMethodsBuilder = createEnumColumnExtensionMethodsBuilder(Genres)
   implicit val genreOptionColumnExtensionMethodsBuilder = createEnumOptionColumnExtensionMethodsBuilder(Genres)
+
+  implicit val roleTypeMapper = createEnumJdbcType("Role", Roles)
+  implicit val roleListTypeMapper = createEnumListJdbcType("Role", Roles)
+  implicit val roleColumnExtensionMethodsBuilder = createEnumColumnExtensionMethodsBuilder(Roles)
+  implicit val roleOptionColumnExtensionMethodsBuilder = createEnumOptionColumnExtensionMethodsBuilder(Roles)
 }

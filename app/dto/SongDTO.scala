@@ -1,9 +1,8 @@
 package dto
 
-import models.Genres
+import models.Genres.Genre
 import sangria.macros.derive._
 import sangria.schema._
-import models.Genres.Genre
 
 case class SongDTO(id: Long,
                    name: String,

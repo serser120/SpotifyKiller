@@ -7,7 +7,7 @@ import service._
 import dto.GroupDTO.ByteArray
 
 case class GroupSchema() {
-  implicit val songHasId = HasId[GroupDTO, Long](_.id)
+  implicit val groupHasId = HasId[GroupDTO, Long](_.id)
 
   val groupQueryType: Seq[Field[Unit, Unit]] = Seq(
     Field(

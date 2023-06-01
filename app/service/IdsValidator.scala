@@ -1,8 +1,11 @@
 package service
 
+import com.github.tminglei.slickpg.utils.PgTokenHelper.Token
 import repository._
+import repository.user.{LikedAlbumRepository, LikedGroupRepository, LikedSingersRepository, LikedSongsRepository, UserRepository}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object IdsValidator {
   def songIdValidate(id: Long) =
@@ -95,5 +98,54 @@ object IdsValidator {
       }
     } yield res
 
+  def userTokenValidate(token: Long) =
+    for {
+      model <- UserRepository.getByToken(token)
+      res = model match {
+        case Some(value) => true
+        case None => false
+      }
+    } yield res
+
+  def likedSongValidate(userId: Long, songId: Long): Future[Boolean] =
+    for {
+      model <- LikedSongsRepository.getLikedSongById(userId, songId)
+      res = model match {
+        case Some(value) => true
+        case None => false
+      }
+    } yield res
+
+  def likedAlbumValidate(userId: Long, albumId: Long): Future[Boolean] =
+    for {
+      model <- LikedAlbumRepository.getLikedAlbumById(userId, albumId)
+      res = model match {
+        case Some(value) => true
+        case None => false
+      }
+    } yield res
+
+  def likedSingersValidate(userId: Long, singerId: Long): Future[Boolean] =
+    for {
+      model <- LikedSingersRepository.getLikedSingerById(userId, singerId)
+      res = model match {
+        case Some(value) => true
+        case None => false
+      }
+    } yield res
+
+  def likedGroupsValidate(userId: Long, groupId: Long): Future[Boolean] =
+    for {
+      model <- LikedGroupRepository.getLikedGroupById(userId, groupId)
+      res = model match {
+        case Some(value) => true
+        case None => false
+      }
+    } yield res
 
 }
+
+
+
+
+

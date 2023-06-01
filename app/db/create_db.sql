@@ -1,26 +1,37 @@
-drop table singers;
-drop table groups;
-drop table albums;
-drop table songs;
-drop table singers_songs;
-drop table singers_albums;
-drop table groups_singers;
-drop table groups_songs;
-drop table groups_albums;
-drop table albums_songs;
-drop type genre;
-drop type role;
+drop type genre cascade;
+drop type role cascade;
+drop table users cascade;
+drop table singers cascade;
+drop table groups cascade;
+drop table albums cascade;
+drop table songs cascade;
+drop table singers_songs cascade;
+drop table singers_albums cascade;
+drop table groups_singers cascade;
+drop table groups_songs cascade;
+drop table groups_albums cascade;
+drop table albums_songs cascade;
+drop table liked_songs cascade;
+drop table liked_albums cascade;
+drop table liked_singers cascade;
+drop table liked_groups cascade;
+drop table genre_history cascade;
+drop table group_history cascade;
+drop table singer_history cascade;
+drop table song_history cascade;
+
 
 create type genre as enum ('Jazz', 'Rock', 'Folk', 'HipHop', 'CountryMusic', 'Blues', 'Classical', 'Reggae','Electronic', 'Funk');
 create type role as enum ('admin', 'user');
 
-create table app_user
+create table users
 (
     id       bigserial primary key,
     login    character varying not null,
     password character varying not null,
     email    character varying,
-    role     role              not null
+    role     role              not null,
+    token    bigserial unique
 );
 
 create table singers
@@ -201,17 +212,22 @@ alter table group_history
 alter table group_history
     add constraint group_history_con check ( not (user_id is null and group_id is null));
 
+insert into users (login, password, email, role, token)
+values ('daniel', '0000', 'qwerty@mail.ru', 'user', 1);
+
+insert into users (login, password, email, role, token)
+values ('the cooler daniel', '0000', 'qwerty@mail.ru', 'admin', 2);
 
 insert into songs(name, photo, length, song, genre)
-VALUES ('Sonne', '0x010203', 111, '0x010203', 'Rock');
+VALUES ('Sonne', '0x010203', 180, '0x010203', 'Rock');
 insert into songs(name, photo, length, song, genre)
-VALUES ('Deutschland', '0x010203', 222, '0x010203', 'Rock');
+VALUES ('Deutschland', '0x010203', 180, '0x010203', 'Jazz');
 insert into songs(name, photo, length, song, genre)
-VALUES ('Moskau', '0x010203', 333, '0x010203', 'Rock');
+VALUES ('Moskau', '0x010203', 180, '0x010203', 'Country');
 insert into songs(name, photo, length, song, genre)
-VALUES ('Совпадения', '0x010203', 444, '0x010203', 'Rock');
+VALUES ('Совпадения', '0x010203', 180, '0x010203', 'Rock');
 insert into songs(name, photo, length, song, genre)
-VALUES ('Mastermind', '0x010203', 555, '0x010203', 'Rock');
+VALUES ('Mastermind', '0x010203', 180, '0x010203', 'Jazz');
 
 insert into albums(name, photo, number_of_plays)
 VALUES ('Вижу', '0x010203', 111);
@@ -291,3 +307,19 @@ insert into albums_songs(album_id, song_id)
 values (4, 3);
 insert into albums_songs(album_id, song_id)
 values (5, 5);
+
+insert into liked_songs(user_id, song_id)
+values (1, 1);
+insert into liked_songs(user_id, song_id)
+values (1, 4);
+insert into liked_songs(user_id, song_id)
+values (1, 5);
+
+insert into liked_albums(user_id, album_id)
+values (1, 1);
+
+insert into liked_singers(user_id, singer_id)
+values (1, 1);
+
+insert into liked_groups(user_id, group_id)
+values (1, 1);

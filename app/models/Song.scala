@@ -1,9 +1,8 @@
 package models
 
 import models.Genres.{Genre, Jazz}
-import slick.lifted.ProvenShape
 import slick.jdbc.PostgresProfile.api._
-import models.MyEnumAPI
+import slick.lifted.ProvenShape
 
 
 case class Song(id: Long, name: String, photo: Array[Byte], length: Int, song: Array[Byte], genre: Genre)
