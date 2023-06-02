@@ -4,6 +4,7 @@ import dto.{SongDTO, UserDTO}
 import dto.histories.HistorySongDTO
 import models.Genres.{Genre, Jazz}
 import models.user.Roles.user
+import models._
 import models.user._
 import repository.user._
 import repository.{GroupsSongsRepository, SingersSongsRepository, SongRepository}
@@ -50,12 +51,21 @@ object UserService {
   }
 
 
-  def registerUser(login: String, password: String, email: String) = {
-    val token = System.currentTimeMillis()
+  def registerUser(login: String, password: String, email: String): Future[Option[UserDTO]] = {
+   val token = generateToken()
     for {
-      temp <- UserRepository.registerUser(User(id = 1, login = login, password = password, email = email, role = user, token = token))
-      res <- UserService.getByToken(token)
+      tokenFlag <- IdsValidator.userTokenValidate(token)
+      res <- if (!tokenFlag){
+        UserRepository.registerUser(User(id = 1, login = login, password = password, email = email, role = user, token = token))
+        getByToken(token)
+      } else {
+        registerUser(login, password, email)
+      }
     } yield res
+  }
+
+  def generateToken() = {
+    System.currentTimeMillis() - (Math.random() * 10000000).toLong
   }
 
   def likeSong(token: Long, songId: Long) = {
@@ -222,11 +232,12 @@ object UserService {
       likedSongsDTO <- SongService.getAllById(songsIds.toList)
       genres = likedSongsDTO.map(_.genre)
       allSongs <- SongService.getAll()
-      songsWithGoodGenres = allSongs.map(song => {
-        if (genres.contains(song.genre)) song else null
+      songsWithGoodGenresAndNull = allSongs.map(song => {
+        if (genres.contains(song.genre)) song else SongDTO(0, "0", Array(0), 0, Array(0), Jazz)
       })
+      songsWithGoodGenres = songsWithGoodGenresAndNull.filterNot(q => q.id == 0)
       songsWithGoodGenresIds = songsWithGoodGenres.map(_.id)
-      recommendedSongsIds = recommendedSongsByGroupsIds.concat(recommendedSongsBySingersIds).concat(songsWithGoodGenresIds)
+      recommendedSongsIds: Seq[Long] = recommendedSongsByGroupsIds.concat(recommendedSongsBySingersIds).concat(songsWithGoodGenresIds)
       recommendedSongs <- SongService.getAllById(recommendedSongsIds.toList)
       res = randomiseRecommended(recommendedSongs)
     } yield res
@@ -253,8 +264,8 @@ object UserService {
       res = if (tokenFlag && songFlag) {
         HistorySongRepository.addHistory(userId, songId)
         HistoryGenreRepository.addHistory(userId, songGenre)
-        HistorySingerRepository.addHistory(userId, singerId)
-        HistoryGroupRepository.addHistory(userId, groupId)
+        if (singerId > 0) HistorySingerRepository.addHistory(userId, singerId)
+        if (groupId > 0) HistoryGroupRepository.addHistory(userId, groupId)
         "*Music play now*"
       } else {
         "Cant play"
@@ -271,7 +282,7 @@ object UserService {
         if (historySong.playingDate.getYear.equals(LocalDate.now().getYear)) historySong
         else null
       })
-      songIds: List[Long] = historySongs.map(_.songId).toList
+      songIds: List[Long] = lastYearHistorySongs.map(_.songId).toList
       bestSongsIds = countHistories(songIds)
       songs = bestSongsIds.map(id => for {
         song <- SongService.getById(id)
@@ -279,6 +290,61 @@ object UserService {
       bestSongsOption <- Future.sequence(songs)
       bestSongs = bestSongsOption.flatten
       res = bestSongs
+    } yield res
+  }
+
+  def getGenresActivity(token: Long) = {
+    for {
+      user <- UserRepository.getByToken(token)
+      userId: Long = user.map(_.id).getOrElse(0L)
+      historyGenres <- HistoryGenreRepository.getAllByUserId(userId)
+      lastYearHistory= historyGenres.map(historyGenre => {
+        if (historyGenre.playingDate.getYear.equals(LocalDate.now().getYear)) historyGenre
+        else null
+      })
+      genres: List[Genre] = lastYearHistory.map(_.genre).toList
+      bestGenres = countGenreHistories(genres)
+      res = bestGenres
+    } yield res
+  }
+
+  def getSingersActivity(token: Long) = {
+    for {
+      user <- UserRepository.getByToken(token)
+      userId: Long = user.map(_.id).getOrElse(0L)
+      historySingers <- HistorySingerRepository.getAllByUserId(userId)
+      lastYearHistorySingers = historySingers.map(historySinger => {
+        if (historySinger.playingDate.getYear.equals(LocalDate.now().getYear)) historySinger
+        else null
+      })
+      singersIds: List[Long] = lastYearHistorySingers.map(_.singerId).toList
+      bestSingersIds = countHistories(singersIds)
+      singers = bestSingersIds.map(id => for {
+        singer <- SingerService.getById(id)
+      } yield singer)
+      bestSingersOption <- Future.sequence(singers)
+      bestSingers = bestSingersOption.flatten
+      res = bestSingers
+    } yield res
+  }
+
+  def getGroupsActivity(token: Long) = {
+    for {
+      user <- UserRepository.getByToken(token)
+      userId: Long = user.map(_.id).getOrElse(0L)
+      historyGroups <- HistoryGroupRepository.getAllByUserId(userId)
+      lastYearHistoryGroups = historyGroups.map(historyGroup => {
+        if (historyGroup.playingDate.getYear.equals(LocalDate.now().getYear)) historyGroup
+        else null
+      })
+      groupsIds: List[Long] = lastYearHistoryGroups.map(_.groupId).toList
+      bestGroupsIds = countHistories(groupsIds)
+      groups = bestGroupsIds.map(id => for {
+        group <- GroupService.getById(id)
+      } yield group)
+      bestGroupsOption <- Future.sequence(groups)
+      bestGroups = bestGroupsOption.flatten
+      res = bestGroups
     } yield res
   }
 
@@ -299,6 +365,31 @@ object UserService {
     }
     iterateResMap
     def turnOverMap(map: Map[Long, Int]) = map.toSeq.sortBy(-_._2).map(keyValue => keyValue._1)
+    val sortedMap = turnOverMap(resMap)
+    val bestSeq = sortedMap.take(5)
+    bestSeq
+  }
+
+  def countGenreHistories(genres: List[Genre]) = {
+
+    var resMap: Map[Genre, Int] = Map[Genre, Int]()
+
+    def addResMap(newMember: (Genre, Int)) = resMap + newMember
+
+    def updateResMap(id: Genre, newNum: Int) = resMap.updated(id, newNum)
+
+    def iterateResMap = for (i <- genres.indices) {
+      resMap = if (resMap.getOrElse(genres(i), 0L) != 0L) {
+        val oldNum = resMap.apply(genres(i))
+        val newNum = oldNum + 1
+        updateResMap(genres(i), newNum)
+      } else {
+        val newMember: (Genre, Int) = (genres(i), 1)
+        addResMap(newMember)
+      }
+    }
+    iterateResMap
+    def turnOverMap(map: Map[Genre, Int]) = map.toSeq.sortBy(-_._2).map(keyValue => keyValue._1)
     val sortedMap = turnOverMap(resMap)
     val bestSeq = sortedMap.take(5)
     bestSeq

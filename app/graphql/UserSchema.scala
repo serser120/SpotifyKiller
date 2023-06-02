@@ -1,7 +1,9 @@
 package graphql
 
 import com.google.inject.Inject
-import dto.{SongDTO, UserDTO}
+import models.Genres.Genre
+import dto.{GroupDTO, SingerDTO, SongDTO, UserDTO}
+import models.Genres
 import sangria.execution.deferred.HasId
 import sangria.schema._
 import service._
@@ -27,6 +29,24 @@ case class UserSchema @Inject()(userService: UserService)() {
       fieldType = ListType(SongDTO.songGraphQL),
       arguments = Argument("token", LongType) :: Nil,
       resolve = context => UserService.getSongsActivity(context.arg[Long]("token"))
+    ),
+    Field(
+      name = "getGenresActivity",
+      fieldType = ListType(Genres.GenreType),
+      arguments = Argument("token", LongType) :: Nil,
+      resolve = context => UserService.getGenresActivity(context.arg[Long]("token"))
+    ),
+    Field(
+      name = "getSingersActivity",
+      fieldType = ListType(SingerDTO.singerGraphQL),
+      arguments = Argument("token", LongType) :: Nil,
+      resolve = context => UserService.getSingersActivity(context.arg[Long]("token"))
+    ),
+    Field(
+      name = "getGroupsActivity",
+      fieldType = ListType(GroupDTO.groupGraphQL),
+      arguments = Argument("token", LongType) :: Nil,
+      resolve = context => UserService.getGroupsActivity(context.arg[Long]("token"))
     )
   )
 
