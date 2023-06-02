@@ -1,8 +1,8 @@
 package dto
 
+import dto.histories.{HistoryGenreDTO, HistoryGroupDTO, HistorySingerDTO, HistorySongDTO}
 import models.user.Roles.Role
 import sangria.macros.derive._
-import sangria.schema._
 
 case class UserDTO(id: Long,
                    login: String,
@@ -13,11 +13,11 @@ case class UserDTO(id: Long,
                    likedSongs: Seq[SongDTO],
                    likedAlbums: Seq[AlbumDTO],
                    likedSingers: Seq[SingerDTO],
-                   likedGroups: Seq[GroupDTO])
-//                   HistorySong: Seq[HistorySongDTO],
-//                   HistoryGenre:Seq[HistoryGenreDTO],
-//                   HistorySinger:Seq[HistorySingerDTO],
-//                   HistoryGroup:Seq[HistoryGroupDTO])
+                   likedGroups: Seq[GroupDTO],
+                   historySong: Seq[HistorySongDTO],
+                   historyGenre:Seq[HistoryGenreDTO],
+                   historySinger:Seq[HistorySingerDTO],
+                   historyGroup:Seq[HistoryGroupDTO])
 
 object UserDTO {
   implicit val userGraphQL = deriveObjectType[Unit, UserDTO](

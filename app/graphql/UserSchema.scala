@@ -16,12 +16,17 @@ case class UserSchema @Inject()(userService: UserService)() {
       arguments = Argument("token", LongType) :: Nil,
       resolve = context => UserService.getByToken(context.arg[Long]("token"))
     ),
-
     Field(
       name = "getRecommendedSongs",
       fieldType = ListType(SongDTO.songGraphQL),
       arguments = Argument("token", LongType) :: Nil,
       resolve = context => UserService.getRecommendedSongs(context.arg[Long]("token"))
+    ),
+    Field(
+      name = "getSongsActivity",
+      fieldType = ListType(SongDTO.songGraphQL),
+      arguments = Argument("token", LongType) :: Nil,
+      resolve = context => UserService.getSongsActivity(context.arg[Long]("token"))
     )
   )
 
@@ -115,6 +120,15 @@ case class UserSchema @Inject()(userService: UserService)() {
       resolve = context => UserService.deleteLikeGroup(
         context.args.arg[Long]("token"),
         context.args.arg[Long]("groupId")
+      )
+    ),
+    Field(
+      name = "playSong",
+      fieldType = OptionType(StringType),
+      arguments = tokenArg :: songIdArg :: Nil,
+      resolve = context => UserService.playSong(
+        context.args.arg[Long]("token"),
+        context.args.arg[Long]("songId")
       )
     )
   )

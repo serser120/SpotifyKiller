@@ -175,8 +175,6 @@ create table song_history
     playing_date DATE
 );
 alter table song_history
-    add constraint song_history_pk primary key (user_id, song_id);
-alter table song_history
     add constraint song_history_con check ( not (user_id is null and song_id is null));
 
 create table genre_history
@@ -185,8 +183,6 @@ create table genre_history
     genre        genre     not null,
     playing_date DATE
 );
-alter table genre_history
-    add constraint genre_history_pk primary key (user_id);
 alter table genre_history
     add constraint genre_history_con check ( not (user_id is null and genre_history.genre is null));
 
@@ -197,8 +193,6 @@ create table singer_history
     playing_date DATE
 );
 alter table singer_history
-    add constraint singer_history_pk primary key (user_id, singer_id);
-alter table singer_history
     add constraint singer_history_con check ( not (user_id is null and singer_id is null));
 
 create table group_history
@@ -207,8 +201,6 @@ create table group_history
     group_id     bigserial not null,
     playing_date DATE
 );
-alter table group_history
-    add constraint group_history_pk primary key (user_id, group_id);
 alter table group_history
     add constraint group_history_con check ( not (user_id is null and group_id is null));
 
@@ -223,7 +215,7 @@ VALUES ('Sonne', '0x010203', 180, '0x010203', 'Rock');
 insert into songs(name, photo, length, song, genre)
 VALUES ('Deutschland', '0x010203', 180, '0x010203', 'Jazz');
 insert into songs(name, photo, length, song, genre)
-VALUES ('Moskau', '0x010203', 180, '0x010203', 'Country');
+VALUES ('Moskau', '0x010203', 180, '0x010203', 'CountryMusic');
 insert into songs(name, photo, length, song, genre)
 VALUES ('Совпадения', '0x010203', 180, '0x010203', 'Rock');
 insert into songs(name, photo, length, song, genre)

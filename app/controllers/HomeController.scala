@@ -1,11 +1,10 @@
 package controllers
-import graphql.{AlbumContext, GroupContext, GroupSchema, MainContext, MainSchema, SingerContext, SongContext, SongSchema}
+import graphql.MainSchema
 import play.api.libs.json._
 import play.api.mvc._
 import sangria.execution._
 import sangria.marshalling.playJson._
 import sangria.parser.{QueryParser, SyntaxError}
-import service.GroupService
 
 import javax.inject._
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -4,12 +4,11 @@ import db.Connection
 import models.AlbumsSongs
 import models.AlbumsSongsTable._
 import slick.jdbc.PostgresProfile.api._
+
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+
 
 object AlbumsSongsRepository {
-
-  import context.PrivateExecutionContext._
 
   val db = Connection.db
 

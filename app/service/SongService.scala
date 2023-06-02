@@ -10,7 +10,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class SongService {
   def getById(id: Long) = SongService.getById(id)
 
-  def getAllById(ids: Seq[Long]) = SongService.getAllById(ids)
+  def getAllById(ids: List[Long]) = SongService.getAllById(ids)
 
   def getAll = SongService.getAll()
 }
@@ -28,10 +28,10 @@ object SongService {
     } yield res
   }
 
-  def getAllById(ids: Seq[Long]) = {
+  def getAllById(ids: List[Long]) = {
     for {
       songs <- SongRepository.getAllById(ids.toList)
-      res = songs.map(value => SongDTO(id = value.id, name = value.name, photo = value.photo, length = value.length, song = value.song, genre = value.genre))
+      res = songs.toList.map(value => SongDTO(id = value.id, name = value.name, photo = value.photo, length = value.length, song = value.song, genre = value.genre))
     } yield res
   }
 
